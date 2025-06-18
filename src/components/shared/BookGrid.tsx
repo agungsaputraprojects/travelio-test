@@ -3,7 +3,7 @@
 import React from 'react';
 import { BookCard } from '@/components/shared/BookCard';
 import { Book } from '@/lib/types';
-import { BookOpen, Search, Sparkles } from 'lucide-react';
+import { BookOpen, Search, Sparkles, Home, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BookGridProps {
@@ -17,6 +17,7 @@ interface BookGridProps {
   onLoadMore?: () => void;
   hasMoreItems?: boolean;
   className?: string;
+  onResetToHome?: () => void; // NEW: Reset to homepage callback
 }
 
 // Skeleton loader component
@@ -44,7 +45,8 @@ export function BookGrid({
   totalItems = 0,
   onLoadMore,
   hasMoreItems = false,
-  className 
+  className,
+  onResetToHome // NEW: Reset callback
 }: BookGridProps) {
   
   // Loading state
@@ -72,6 +74,27 @@ export function BookGrid({
           We could not find any books matching &quot;<span className="font-semibold text-blue-600">{searchQuery}</span>&quot;. 
           Try different keywords or explore our suggestions below.
         </p>
+
+        {/* NEW: Action buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          {onResetToHome && (
+            <Button
+              onClick={onResetToHome}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Home className="w-5 h-5 mr-2" />
+              Back to Homepage
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="px-8 py-3 rounded-xl hover:bg-gray-50"
+          >
+            <RotateCcw className="w-5 h-5 mr-2" />
+            Try Again
+          </Button>
+        </div>
         
         <div className="bg-white rounded-xl p-6 max-w-lg mx-auto shadow-sm border">
           <h4 className="font-semibold text-gray-900 mb-4 flex items-center justify-center gap-2">
@@ -155,6 +178,21 @@ export function BookGrid({
               Showing first {books.length} results
             </p>
           )}
+          
+          {/* NEW: Reset option in results header */}
+          {onResetToHome && (
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onResetToHome}
+                className="text-sm hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                New Search
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -197,10 +235,22 @@ export function BookGrid({
       {books.length >= 40 && !hasMoreItems && (
         <div className="text-center py-8">
           <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto">
-            <p className="text-gray-600 mb-2">🎉 You have seen all the results!</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-gray-600 mb-4">🎉 You have seen all the results!</p>
+            <p className="text-sm text-gray-500 mb-4">
               Try a different search term to discover more books.
             </p>
+            
+            {/* NEW: Reset button at end of results */}
+            {onResetToHome && (
+              <Button
+                variant="outline"
+                onClick={onResetToHome}
+                className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Start New Search
+              </Button>
+            )}
           </div>
         </div>
       )}

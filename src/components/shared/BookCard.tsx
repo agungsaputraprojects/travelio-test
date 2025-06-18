@@ -8,7 +8,7 @@ import { WishlistButton } from '@/components/shared/WishlistButton';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/lib/types';
 import { formatAuthors, getBookThumbnail, formatDate } from '@/lib/utils';
-import { Calendar, BookOpen, ExternalLink, Eye, User, Building } from 'lucide-react';
+import { Calendar, BookOpen, ExternalLink, Eye, User } from 'lucide-react';
 
 interface BookCardProps {
   book: Book;
@@ -17,6 +17,12 @@ interface BookCardProps {
   onPreview?: (book: Book) => void;
   className?: string;
 }
+
+// Helper function to truncate category names
+const truncateCategory = (category: string, maxLength: number = 15): string => {
+  if (category.length <= maxLength) return category;
+  return category.substring(0, maxLength - 3) + '...';
+};
 
 export function BookCard({ 
   book, 
@@ -85,37 +91,39 @@ export function BookCard({
             )}
 
             {/* Overlay on hover */}
-            <div className={`absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+            <div className={`absolute inset-0 bg-black/40 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
             
-            {/* Action buttons overlay */}
-            <div className={`absolute inset-0 flex items-center justify-center gap-2 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-              {book.previewLink && (
+            {/* Action buttons overlay - IMPROVED */}
+            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="flex flex-col gap-2 px-4">
+                {book.previewLink && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handlePreviewClick}
+                    className="bg-white/95 hover:bg-white text-gray-800 shadow-lg backdrop-blur-sm border-0 font-medium transition-all duration-200 hover:scale-105 w-full"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Preview
+                  </Button>
+                )}
+                
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={handlePreviewClick}
-                  className="bg-white/90 hover:bg-white text-gray-800 shadow-lg backdrop-blur-sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (book.infoLink) {
+                      window.open(book.infoLink, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="bg-white/95 hover:bg-white text-gray-800 shadow-lg backdrop-blur-sm border-0 font-medium transition-all duration-200 hover:scale-105 w-full"
                 >
-                  <Eye className="w-4 h-4 mr-1" />
-                  Preview
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Details
                 </Button>
-              )}
-              
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (book.infoLink) {
-                    window.open(book.infoLink, '_blank', 'noopener,noreferrer');
-                  }
-                }}
-                className="bg-white/90 hover:bg-white text-gray-800 shadow-lg backdrop-blur-sm"
-              >
-                <ExternalLink className="w-4 h-4 mr-1" />
-                Details
-              </Button>
+              </div>
             </div>
           </div>
           
@@ -130,11 +138,16 @@ export function BookCard({
             />
           </div>
 
-          {/* Category Badge */}
+          {/* Category Badge - IMPROVED */}
           {book.categories && book.categories.length > 0 && (
             <div className="absolute top-3 left-3">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg">
-                {book.categories[0]}
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg max-w-[120px]"
+                title={book.categories[0]} // Show full category on hover
+              >
+                <span className="block truncate">
+                  {truncateCategory(book.categories[0])}
+                </span>
               </div>
             </div>
           )}
@@ -142,61 +155,62 @@ export function BookCard({
         
         {/* Book Information */}
         <div className="p-4 flex-1 flex flex-col">
-          {/* Title */}
-          <h3 className="font-bold text-sm line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors leading-tight min-h-[2.5rem]">
-            {book.title}
+          {/* Title - IMPROVED TRUNCATION */}
+          <h3 className="font-bold text-sm mb-2 group-hover:text-blue-600 transition-colors leading-tight min-h-[2.5rem]">
+            <span className="line-clamp-2" title={book.title}>
+              {book.title}
+            </span>
           </h3>
           
-          {/* Author */}
-          <div className="flex items-center gap-1 mb-3">
-            <User className="w-3 h-3 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground line-clamp-1 flex-1">
+          {/* Author - IMPROVED */}
+          <div className="flex items-center gap-1 mb-4">
+            <User className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+            <p className="text-xs text-muted-foreground line-clamp-1 flex-1" title={authors}>
               {authors}
             </p>
           </div>
-
-          {/* Publisher & Date */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-            {book.publisher && (
-              <div className="flex items-center gap-1">
-                <Building className="w-3 h-3" />
-                <span className="line-clamp-1">{book.publisher}</span>
-              </div>
-            )}
-            {publishedYear && (
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                <span>{publishedYear}</span>
-              </div>
-            )}
-          </div>
           
           {/* Bottom section */}
-          <div className="mt-auto space-y-3">
-            {/* Rating */}
-            {rating > 0 ? (
-              <div className="flex items-center justify-between">
-                <StarRating rating={rating} size="sm" />
-                {book.ratingsCount && (
-                  <span className="text-xs text-muted-foreground">
-                    ({book.ratingsCount})
+          <div className="mt-auto space-y-2">
+            {/* Rating - IMPROVED */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <StarRating rating={rating} size="sm" showRating={false} />
+                {rating > 0 && (
+                  <span className="text-xs text-muted-foreground ml-1">
+                    {rating.toFixed(1)}
                   </span>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center">
-                <StarRating rating={0} size="sm" showRating={false} />
-                <span className="text-xs text-muted-foreground ml-2">No reviews</span>
-              </div>
-            )}
+              {book.ratingsCount && book.ratingsCount > 0 ? (
+                <span className="text-xs text-muted-foreground">
+                  ({book.ratingsCount})
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  No reviews
+                </span>
+              )}
+            </div>
             
-            {/* Page Count */}
-            {book.pageCount && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <BookOpen className="w-3 h-3" />
-                <span>{book.pageCount} pages</span>
-              </div>
-            )}
+            {/* Date & Page Count - NEW LAYOUT */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              {publishedYear ? (
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  <span>{publishedYear}</span>
+                </div>
+              ) : (
+                <div></div>
+              )}
+              
+              {book.pageCount && (
+                <div className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3 flex-shrink-0" />
+                  <span>{book.pageCount} pages</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

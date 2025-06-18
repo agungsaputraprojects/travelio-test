@@ -15,7 +15,9 @@ import {
   Sparkles,
   Star,
   Users,
-  Globe
+  Globe,
+  Home,
+  RotateCcw
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -85,6 +87,22 @@ export default function HomePage() {
     }
   };
 
+  // NEW: Reset to homepage function
+  const resetToHomepage = useCallback(() => {
+    setSearchState({
+      query: '',
+      books: [],
+      isLoading: false,
+      error: null,
+      hasSearched: false,
+      totalItems: 0
+    });
+    setShowWishlist(false);
+    
+    // Optional: Scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const handleLoadMore = useCallback(() => {
     if (searchState.query && !searchState.isLoading) {
       searchBooks(searchState.query, true);
@@ -97,7 +115,6 @@ export default function HomePage() {
         wishlistStorage.addToWishlist(book);
         const updatedWishlist = wishlistStorage.getWishlist();
         setWishlist(updatedWishlist);
-        // Fix: Convert Set to Array first, then back to Set
         setWishlistIds(prev => new Set([...Array.from(prev), book.id]));
       } else {
         wishlistStorage.removeFromWishlist(book.id);
@@ -137,32 +154,54 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div 
+                className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform duration-200"
+                onClick={resetToHomepage}
+                title="Back to Homepage"
+              >
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 
+                  className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={resetToHomepage}
+                >
                   BookFinder
                 </h1>
                 <p className="text-xs text-gray-500 hidden sm:block">Discover your next great read</p>
               </div>
             </div>
             
-            <Button
-              variant={showWishlist ? "default" : "outline"}
-              onClick={toggleWishlistView}
-              className={`flex items-center gap-2 transition-all duration-200 ${
-                showWishlist 
-                  ? 'bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white shadow-lg' 
-                  : 'hover:bg-red-50 hover:border-red-300 hover:text-red-600'
-              }`}
-            >
-              <Heart className={`w-4 h-4 ${showWishlist ? 'fill-current' : ''}`} />
-              <span className="hidden sm:inline">Wishlist</span>
-              <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
-                {wishlist.length}
-              </span>
-            </Button>
+            <div className="flex items-center gap-3">
+              {/* NEW: Reset button - show when user has searched or viewing wishlist */}
+              {(searchState.hasSearched || showWishlist) && (
+                <Button
+                  variant="outline"
+                  onClick={resetToHomepage}
+                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200"
+                  title="Back to Homepage"
+                >
+                  <Home className="w-4 h-4" />
+                  <span className="hidden sm:inline">Home</span>
+                </Button>
+              )}
+              
+              <Button
+                variant={showWishlist ? "default" : "outline"}
+                onClick={toggleWishlistView}
+                className={`flex items-center gap-2 transition-all duration-200 ${
+                  showWishlist 
+                    ? 'bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white shadow-lg' 
+                    : 'hover:bg-red-50 hover:border-red-300 hover:text-red-600'
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${showWishlist ? 'fill-current' : ''}`} />
+                <span className="hidden sm:inline">Wishlist</span>
+                <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
+                  {wishlist.length}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -210,6 +249,7 @@ export default function HomePage() {
               onSearch={(query) => searchBooks(query, false)} 
               isLoading={searchState.isLoading}
               initialQuery={searchState.query}
+              onClear={resetToHomepage} // NEW: Pass reset function to SearchBar
             />
           </div>
         )}
@@ -278,18 +318,28 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Error Message */}
+        {/* Error Message with Reset Option */}
         {searchState.error && (
           <Card className="mb-8 border-red-200 bg-red-50">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <Search className="w-4 h-4 text-red-600" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <Search className="w-4 h-4 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-red-900">Search Error</h3>
+                    <p className="text-red-700">{searchState.error}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-red-900">Search Error</h3>
-                  <p className="text-red-700">{searchState.error}</p>
-                </div>
+                <Button
+                  variant="outline"
+                  onClick={resetToHomepage}
+                  className="flex items-center gap-2 hover:bg-red-100 border-red-300 text-red-700"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Try Again
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -306,13 +356,23 @@ export default function HomePage() {
               <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto">
                 Start searching for books and add them to your wishlist to save for later reading.
               </p>
-              <Button 
-                onClick={() => setShowWishlist(false)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                <Search className="w-5 h-5 mr-2" />
-                Start Searching Books
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => setShowWishlist(false)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Start Searching Books
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={resetToHomepage}
+                  className="px-8 py-3 rounded-xl hover:bg-gray-50"
+                >
+                  <Home className="w-5 h-5 mr-2" />
+                  Back to Homepage
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -327,6 +387,7 @@ export default function HomePage() {
           totalItems={searchState.totalItems}
           onLoadMore={hasMoreItems ? handleLoadMore : undefined}
           hasMoreItems={hasMoreItems}
+          onResetToHome={resetToHomepage} // NEW: Pass reset function to BookGrid
         />
 
         {/* Statistics */}
@@ -367,10 +428,16 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-12">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div 
+                className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                onClick={resetToHomepage}
+              >
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span 
+                className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={resetToHomepage}
+              >
                 BookFinder
               </span>
             </div>

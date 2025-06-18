@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Search, Loader2, X, Clock, TrendingUp } from 'lucide-react';
+import { Search, Loader2, X, Clock, TrendingUp, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,7 @@ interface SearchBarProps {
   isLoading?: boolean;
   initialQuery?: string;
   className?: string;
+  onClear?: () => void; // NEW: Optional callback for clearing/resetting
 }
 
 const TRENDING_SEARCHES = [
@@ -27,7 +28,8 @@ export function SearchBar({
   onSearch, 
   isLoading = false, 
   initialQuery = '',
-  className 
+  className,
+  onClear // NEW: Reset callback
 }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -47,6 +49,11 @@ export function SearchBar({
       }
     }
   }, []);
+
+  // NEW: Update query when initialQuery changes (for reset functionality)
+  React.useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   const saveToRecentSearches = (searchQuery: string) => {
     if (typeof window === 'undefined' || !searchQuery.trim()) return;
@@ -97,6 +104,15 @@ export function SearchBar({
     inputRef.current?.focus();
   };
 
+  // NEW: Handle reset to homepage
+  const handleReset = () => {
+    setQuery('');
+    setShowSuggestions(false);
+    if (onClear) {
+      onClear();
+    }
+  };
+
   const clearRecentSearches = () => {
     setRecentSearches([]);
     localStorage.removeItem(RECENT_SEARCHES_KEY);
@@ -119,7 +135,7 @@ export function SearchBar({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             className={cn(
-              "w-full h-14 pl-12 pr-24 rounded-xl border border-gray-200",
+              "w-full h-14 pl-12 pr-32 rounded-xl border border-gray-200", // NEW: Increased pr for more buttons
               "text-base placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
               "bg-white shadow-lg transition-all duration-200",
@@ -131,6 +147,20 @@ export function SearchBar({
           />
           
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+            {/* NEW: Home/Reset button - show when there's a query or we're in search state */}
+            {(query || initialQuery) && onClear && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                className="h-8 w-8 p-0 hover:bg-blue-100 rounded-full"
+                title="Back to Homepage"
+              >
+                <Home className="w-4 h-4 text-blue-600" />
+              </Button>
+            )}
+            
             {query && !isLoading && (
               <Button
                 type="button"
@@ -138,6 +168,7 @@ export function SearchBar({
                 size="sm"
                 onClick={clearQuery}
                 className="h-8 w-8 p-0 hover:bg-gray-100 rounded-full"
+                title="Clear search"
               >
                 <X className="w-4 h-4" />
               </Button>

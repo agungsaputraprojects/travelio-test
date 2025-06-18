@@ -65,7 +65,7 @@ export function StarRating({
       <div 
         key={index} 
         className={cn(
-          "relative",
+          "relative flex-shrink-0",
           interactive && "cursor-pointer transition-transform hover:scale-110"
         )}
         onClick={() => handleStarClick(starNumber)}
@@ -99,36 +99,35 @@ export function StarRating({
     );
   });
 
-  if (rating === 0 && !interactive) {
+  // Empty state (no rating)
+  if (rating === 0 && !interactive && !showRating) {
     return (
-      <div className="flex items-center gap-1">
-        <div 
-          className={cn("flex", interactive && "gap-1")}
-          onMouseLeave={handleMouseLeave}
-        >
-          {stars}
-        </div>
-        {showRating && (
-          <span className={cn("text-muted-foreground ml-1", textSizeClasses[size])}>
-            No rating
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1">
       <div 
-        className={cn("flex", interactive && "gap-1")}
+        className={cn("flex gap-0.5", interactive && "gap-1")}
         onMouseLeave={handleMouseLeave}
       >
         {stars}
       </div>
-      {showRating && (
+    );
+  }
+
+  // With rating display
+  return (
+    <div className="flex items-center gap-1">
+      <div 
+        className={cn("flex gap-0.5", interactive && "gap-1")}
+        onMouseLeave={handleMouseLeave}
+      >
+        {stars}
+      </div>
+      {showRating && rating > 0 && (
         <span className={cn("text-muted-foreground ml-1", textSizeClasses[size])}>
           {displayRating.toFixed(1)}
-          {rating > 0 && " stars"}
+        </span>
+      )}
+      {showRating && rating === 0 && (
+        <span className={cn("text-muted-foreground ml-1", textSizeClasses[size])}>
+          No rating
         </span>
       )}
     </div>
