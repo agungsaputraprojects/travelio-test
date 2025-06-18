@@ -99,7 +99,6 @@ export function StarRating({
     );
   });
 
-  // Empty state (no rating)
   if (rating === 0 && !interactive && !showRating) {
     return (
       <div 
@@ -111,7 +110,6 @@ export function StarRating({
     );
   }
 
-  // With rating display
   return (
     <div className="flex items-center gap-1">
       <div 

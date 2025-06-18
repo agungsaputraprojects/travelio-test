@@ -38,7 +38,6 @@ export function WishlistButton({
     try {
       await onToggle(book, !isInWishlist);
       
-      // Show success state briefly
       if (!isInWishlist) {
         setJustAdded(true);
         setTimeout(() => setJustAdded(false), 2000);
@@ -86,7 +85,6 @@ export function WishlistButton({
     return isInWishlist ? 'Remove from wishlist' : 'Add to wishlist';
   };
 
-  // Button variant
   if (variant === 'button') {
     return (
       <Button
@@ -113,7 +111,6 @@ export function WishlistButton({
     );
   }
 
-  // Floating variant
   if (variant === 'floating') {
     return (
       <Button
@@ -134,7 +131,6 @@ export function WishlistButton({
     );
   }
 
-  // Icon variant (default)
   return (
     <Button
       variant="ghost"

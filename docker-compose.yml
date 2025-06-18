@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  bookfinder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    restart: unless-stopped
+    networks:
+      - bookfinder-network
+
+networks:
+  bookfinder-network:
+    driver: bridge
+
+volumes:
+  node_modules:

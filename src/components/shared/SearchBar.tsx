@@ -10,7 +10,7 @@ interface SearchBarProps {
   isLoading?: boolean;
   initialQuery?: string;
   className?: string;
-  onClear?: () => void; // NEW: Optional callback for clearing/resetting
+  onClear?: () => void;
 }
 
 const TRENDING_SEARCHES = [
@@ -29,7 +29,7 @@ export function SearchBar({
   isLoading = false, 
   initialQuery = '',
   className,
-  onClear // NEW: Reset callback
+  onClear 
 }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -37,7 +37,6 @@ export function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    // Load recent searches from localStorage
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
       if (stored) {
@@ -50,7 +49,6 @@ export function SearchBar({
     }
   }, []);
 
-  // NEW: Update query when initialQuery changes (for reset functionality)
   React.useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
@@ -87,7 +85,6 @@ export function SearchBar({
   };
 
   const handleInputBlur = () => {
-    // Delay hiding suggestions to allow clicking on them
     setTimeout(() => setShowSuggestions(false), 200);
   };
 
@@ -104,7 +101,6 @@ export function SearchBar({
     inputRef.current?.focus();
   };
 
-  // NEW: Handle reset to homepage
   const handleReset = () => {
     setQuery('');
     setShowSuggestions(false);
@@ -135,7 +131,7 @@ export function SearchBar({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             className={cn(
-              "w-full h-14 pl-12 pr-32 rounded-xl border border-gray-200", // NEW: Increased pr for more buttons
+              "w-full h-14 pl-12 pr-32 rounded-xl border border-gray-200",
               "text-base placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
               "bg-white shadow-lg transition-all duration-200",

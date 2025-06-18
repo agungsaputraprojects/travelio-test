@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  // State management
   const [searchState, setSearchState] = useState<SearchState>({
     query: '',
     books: [],
@@ -35,7 +34,6 @@ export default function HomePage() {
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
   const [showWishlist, setShowWishlist] = useState(false);
 
-  // Load wishlist on component mount
   useEffect(() => {
     const loadedWishlist = wishlistStorage.getWishlist();
     setWishlist(loadedWishlist);
@@ -87,7 +85,6 @@ export default function HomePage() {
     }
   };
 
-  // NEW: Reset to homepage function
   const resetToHomepage = useCallback(() => {
     setSearchState({
       query: '',
@@ -99,7 +96,6 @@ export default function HomePage() {
     });
     setShowWishlist(false);
     
-    // Optional: Scroll to top for better UX
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -142,7 +138,14 @@ export default function HomePage() {
     imageLinks: item.thumbnail ? {
       thumbnail: item.thumbnail
     } : undefined,
-    averageRating: item.rating
+    averageRating: item.rating,
+    previewLink: item.previewLink,
+    infoLink: item.infoLink,
+    publishedDate: item.publishedDate,
+    pageCount: item.pageCount,
+    categories: item.categories,
+    ratingsCount: item.ratingsCount,
+    publisher: item.publisher
   }));
 
   const hasMoreItems = searchState.totalItems > searchState.books.length;
@@ -173,7 +176,7 @@ export default function HomePage() {
             </div>
             
             <div className="flex items-center gap-3">
-              {/* NEW: Reset button - show when user has searched or viewing wishlist */}
+              {/* Reset button - show when user has searched or viewing wishlist */}
               {(searchState.hasSearched || showWishlist) && (
                 <Button
                   variant="outline"
@@ -249,32 +252,35 @@ export default function HomePage() {
               onSearch={(query) => searchBooks(query, false)} 
               isLoading={searchState.isLoading}
               initialQuery={searchState.query}
-              onClear={resetToHomepage} // NEW: Pass reset function to SearchBar
+              onClear={resetToHomepage}
             />
           </div>
         )}
 
-        {/* Wishlist Header */}
+        {/* Wishlist Header - FIXED */}
         {showWishlist && (
           <div className="mb-8">
-            <div className="flex items-center gap-4 mb-6">
+            {/* Back button - Separated */}
+            <div className="mb-6">
               <Button
-                variant="outline"
+                variant="outline" 
                 onClick={() => setShowWishlist(false)}
                 className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Search
               </Button>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                  <Heart className="w-8 h-8 text-red-500 fill-current" />
-                  My Wishlist
-                </h2>
-                <p className="text-gray-600">
-                  {wishlist.length} book{wishlist.length !== 1 ? 's' : ''} saved for later
-                </p>
-              </div>
+            </div>
+            
+            {/* Centered Title */}
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-3 mb-2">
+                <Heart className="w-8 h-8 text-red-500 fill-current" />
+                My Wishlist
+              </h2>
+              <p className="text-gray-600">
+                {wishlist.length} book{wishlist.length !== 1 ? 's' : ''} saved for later
+              </p>
             </div>
           </div>
         )}
@@ -377,7 +383,7 @@ export default function HomePage() {
           </Card>
         )}
 
-        {/* Books Display */}
+        {/* Books Display - FIXED: No load more for wishlist */}
         <BookGrid
           books={showWishlist ? wishlistBooks : searchState.books}
           wishlistIds={wishlistIds}
@@ -385,9 +391,9 @@ export default function HomePage() {
           isLoading={searchState.isLoading}
           searchQuery={showWishlist ? '' : searchState.query}
           totalItems={searchState.totalItems}
-          onLoadMore={hasMoreItems ? handleLoadMore : undefined}
-          hasMoreItems={hasMoreItems}
-          onResetToHome={resetToHomepage} // NEW: Pass reset function to BookGrid
+          onLoadMore={!showWishlist ? handleLoadMore : undefined}
+          hasMoreItems={!showWishlist ? hasMoreItems : false}
+          onResetToHome={resetToHomepage}
         />
 
         {/* Statistics */}

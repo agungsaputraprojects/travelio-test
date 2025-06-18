@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         'Accept': 'application/json',
         'User-Agent': 'BookSearchApp/1.0'
       },
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 3600 }
     });
 
     if (!response.ok) {
@@ -33,12 +33,10 @@ export async function GET(request: NextRequest) {
 
     const data: GoogleBooksResponse = await response.json();
     
-    // Transform and filter the data
     const books = data.items?.map(item => ({
       ...item.volumeInfo,
       id: item.id
     })).filter(book => {
-      // Filter out books without essential data
       return book.title && book.title.trim() !== '';
     }) || [];
 
@@ -57,7 +55,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching books:', error);
     
-    // Return more specific error messages
     if (error instanceof Error && error.message.includes('fetch')) {
       return NextResponse.json({
         success: false,

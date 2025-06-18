@@ -18,7 +18,6 @@ interface BookCardProps {
   className?: string;
 }
 
-// Helper function to truncate category names
 const truncateCategory = (category: string, maxLength: number = 15): string => {
   if (category.length <= maxLength) return category;
   return category.substring(0, maxLength - 3) + '...';
@@ -143,7 +142,7 @@ export function BookCard({
             <div className="absolute top-3 left-3">
               <div 
                 className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg max-w-[120px]"
-                title={book.categories[0]} // Show full category on hover
+                title={book.categories[0]}
               >
                 <span className="block truncate">
                   {truncateCategory(book.categories[0])}

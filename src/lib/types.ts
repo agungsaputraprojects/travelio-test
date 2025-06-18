@@ -33,6 +33,13 @@ export interface WishlistItem {
   thumbnail?: string;
   rating?: number;
   addedAt: string;
+  previewLink?: string;
+  infoLink?: string;
+  publishedDate?: string;
+  pageCount?: number;
+  categories?: string[];
+  ratingsCount?: number;
+  publisher?: string;
 }
 
 export interface SearchState {

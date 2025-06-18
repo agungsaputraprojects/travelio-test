@@ -53,7 +53,6 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   };
 }
 
-// LocalStorage utilities for wishlist
 export const wishlistStorage = {
   getWishlist: (): WishlistItem[] => {
     if (typeof window === 'undefined') return [];

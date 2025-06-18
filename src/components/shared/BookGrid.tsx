@@ -17,10 +17,9 @@ interface BookGridProps {
   onLoadMore?: () => void;
   hasMoreItems?: boolean;
   className?: string;
-  onResetToHome?: () => void; // NEW: Reset to homepage callback
+  onResetToHome?: () => void;
 }
 
-// Skeleton loader component
 const BookCardSkeleton = () => (
   <div className="animate-shimmer bg-white rounded-lg shadow-sm overflow-hidden">
     <div className="aspect-[3/4] bg-gray-200"></div>
@@ -46,10 +45,9 @@ export function BookGrid({
   onLoadMore,
   hasMoreItems = false,
   className,
-  onResetToHome // NEW: Reset callback
+  onResetToHome
 }: BookGridProps) {
   
-  // Loading state
   if (isLoading && books.length === 0) {
     return (
       <div className={`${className}`}>
@@ -62,7 +60,6 @@ export function BookGrid({
     );
   }
 
-  // No results state
   if (books.length === 0 && searchQuery) {
     return (
       <div className={`text-center py-16 ${className}`}>
@@ -124,7 +121,6 @@ export function BookGrid({
     );
   }
 
-  // Empty state (no search performed)
   if (books.length === 0 && !searchQuery) {
     return (
       <div className={`text-center py-20 ${className}`}>
@@ -146,7 +142,6 @@ export function BookGrid({
               size="sm"
               className="rounded-full hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
               onClick={() => {
-                // This would trigger a search for the suggestion
                 console.log(`Search for: ${suggestion}`);
               }}
             >
@@ -158,7 +153,6 @@ export function BookGrid({
     );
   }
 
-  // Results found
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Results header */}
